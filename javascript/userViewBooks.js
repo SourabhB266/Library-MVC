@@ -9,18 +9,57 @@ let list = "";
 async function displaying() {
     let resp = await fetch("http://localhost:8080/Library_With_MVC/getAllBooks");
     let books = await resp.json();
-    for (let i = 0; i < books.length; i++) {
-        list += `<tr>  <td>${++count}</td> 
-        <td>${books[i].catagory}</td> 
-        <td>${books[i].bookId}</td> 
-        <td>${books[i].bookTitle}</td>
-        <td>${books[i].author}</td>
-        <td>${books[i].edition}</td>
-        <td>${books[i].no_of_books}</td> 
-        <td><button style="" onclick =request(${books[i].bookId})>Request</button> </td> 
-        </tr>`
+    let req =await fetch('http://localhost:8080/Library_With_MVC/getAllRequest');
+    let reqs = await req.json();
+    let resp1 = await fetch('http://localhost:8080/Library_With_MVC/getAllIssueBook');
+    let ib = await resp1.json();
+    for (let book of books) {
+        let row = document.createElement('tr');
+        let slno = document.createElement('td');
+        slno.innerText = String(++count);
+        row.appendChild(slno);
+        let catagory = document.createElement('td');
+        catagory.innerText = book.catagory;
+        row.appendChild(catagory);
+        let bookId = document.createElement('td');
+        bookId.innerText = book.bookId;
+        row.appendChild(bookId);
+        let bookTitle = document.createElement('td');
+        bookTitle.innerText = book.bookTitle;
+        row.appendChild(bookTitle);
+        let author = document.createElement('td');
+        author.innerText = book.author;
+        row.appendChild(author);
+        let edition = document.createElement('td');
+        edition.innerText = book.edition;
+        row.appendChild(edition);
+        let no_of_books = document.createElement('td');
+        no_of_books.innerText = book.no_of_books;
+        row.appendChild(no_of_books);
+    
+        let req = document.createElement('td');
+        let button = document.createElement('button');
+        button.setAttribute("value","Request");
+        button.innerText="Request";
+        for(let r of reqs){
+          if(r.bookId == book.bookId){
+            button.disabled= true;
+            break;
+          }
+        }
+        for(let i of ib){
+          if(i.bookId == book.bookId){
+            button.disabled= true;
+            break;
+          }
+        }
+        button.addEventListener('click', () => {
+          request(book.bookId);
+        });
+        req.appendChild(button);
+        row.appendChild(req);
+        dispbooks.appendChild(row);
     }
-    dispbooks.innerHTML = list;
 }
 
 async function request(bookId) {
@@ -39,7 +78,7 @@ async function request(bookId) {
                         uname: user.fname + " " +user.lname,
                         td: tm,
                     };
-                    let url = "hhttp://localhost:8080/Library_With_MVC/saveRequest";
+                    let url = "http://localhost:8080/Library_With_MVC/saveRequest";
                     let par = {
                         method: 'POST',
                         headers: {
@@ -51,6 +90,7 @@ async function request(bookId) {
                     await fetch(url, par);
                     document.querySelector(".msg").innerHTML = "Request Sent Successfully..!";
                     setTimeout(() => document.querySelector(".msg").innerHTML = "", 2000);
+                    location.reload();
                 }
             }
 
